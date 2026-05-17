@@ -1,0 +1,22 @@
+// Licensed under the Apache License, Version 2.0
+// Copyright 2025, Mindful Software LLC, All rights reserved.
+
+import 'package:otel_azure_iot_hub/otel_azure_iot_hub.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('otel_azure_iot_hub', () {
+    test('suppression toggles in zone', () async {
+      expect(azureIoTHubInstrumentationSuppressed(), isFalse);
+      await runWithoutAzureIoTHubInstrumentationAsync(() async {
+        expect(azureIoTHubInstrumentationSuppressed(), isTrue);
+      });
+      expect(azureIoTHubInstrumentationSuppressed(), isFalse);
+    });
+
+    test('AzureIoTHubResult fields default null', () {
+      const r = AzureIoTHubResult();
+      expect(r.statusCode, isNull);
+    });
+  });
+}
