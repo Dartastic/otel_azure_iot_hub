@@ -2,7 +2,6 @@
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_azure_iot_hub_suppression.dart';
 
@@ -56,55 +55,72 @@ Future<T> tracedAzureIoTHub<T>({
   final t = tracer ?? OTel.tracerProvider().getTracer('otel_azure_iot_hub');
   final span = t.startSpan('iothub $operation', kind: SpanKind.client);
   try {
-    span.setStringAttribute('azure.service', 'iot_hub');
-    span.setStringAttribute('messaging.system', 'azure_iot');
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('azure.service', 'iot_hub')]));
+    span.addAttributes(OTel.attributes(
+        [OTel.attributeString('messaging.system', 'azure_iot')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.subscriptionId != null) {
-        span.setStringAttribute('azure.subscription.id', res.subscriptionId!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('azure.subscription.id', res.subscriptionId!)
+        ]));
       }
       if (res.resourceGroup != null) {
-        span.setStringAttribute('azure.resource_group', res.resourceGroup!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('azure.resource_group', res.resourceGroup!)
+        ]));
       }
       if (res.hubName != null) {
-        span.setStringAttribute('azure.iot.hub.name', res.hubName!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('azure.iot.hub.name', res.hubName!)]));
       }
       if (res.deviceId != null) {
-        span.setStringAttribute('messaging.client_id', res.deviceId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('messaging.client_id', res.deviceId!)]));
       }
       if (res.moduleId != null) {
-        span.setStringAttribute('azure.iot.module.id', res.moduleId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('azure.iot.module.id', res.moduleId!)]));
       }
       if (res.topic != null) {
-        span.setStringAttribute('messaging.destination.name', res.topic!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('messaging.destination.name', res.topic!)]));
       }
       if (res.direction != null) {
-        span.setStringAttribute('azure.iot.direction', res.direction!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('azure.iot.direction', res.direction!)]));
       }
       if (res.twinVersion != null) {
-        span.setIntAttribute('azure.iot.twin.version', res.twinVersion!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('azure.iot.twin.version', res.twinVersion!)]));
       }
       if (res.jobId != null) {
-        span.setStringAttribute('azure.iot.job.id', res.jobId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('azure.iot.job.id', res.jobId!)]));
       }
       if (res.region != null) {
-        span.setStringAttribute('cloud.region', res.region!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('cloud.region', res.region!)]));
       }
       if (res.statusCode != null) {
-        span.setIntAttribute('http.response.status_code', res.statusCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
       }
       if (res.errorCode != null) {
-        span.setStringAttribute('iothub.error.code', res.errorCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('iothub.error.code', res.errorCode!)]));
       }
-      final fail =
-          res.errorCode != null ||
+      final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.setStringAttribute(
-          ErrorResource.errorType.key,
-          res.errorCode ?? 'iothub.error',
-        );
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+            ErrorResource.errorType.key,
+            res.errorCode ?? 'iothub.error',
+          )
+        ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
     }
